@@ -9,6 +9,7 @@ use clap::{Arg, Command};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    console_subscriber::init();
     let matches = Command::new("rproxy")
         .version("0.1")
         .author("Muhammad Falak R Wani <falakreyaz@gmail.com>")
