@@ -3,17 +3,21 @@ use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 
 use futures::FutureExt;
-use std::env;
 use std::error::Error;
+
+use clap::{Arg, Command};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let listen_addr = env::args()
-        .nth(1)
-        .unwrap_or_else(|| "127.0.0.1:8081".to_string());
-    let server_addr = env::args()
-        .nth(2)
-        .unwrap_or_else(|| "127.0.0.1:8080".to_string());
+    let matches = Command::new("rproxy")
+        .version("0.1")
+        .author("Muhammad Falak R Wani <falakreyaz@gmail.com>")
+        .arg_required_else_help(true)
+        .arg(Arg::new("listen_address").short('l').takes_value(true))
+        .arg(Arg::new("server_address").short('s').takes_value(true))
+        .get_matches();
+    let listen_addr = matches.value_of("listen_address").unwrap();
+    let server_addr = matches.value_of("server_address").unwrap();
 
     println!("Listening on: {}", listen_addr);
     println!("Proxying to: {}", server_addr);
@@ -21,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let listener = TcpListener::bind(listen_addr).await?;
 
     while let Ok((inbound, _)) = listener.accept().await {
-        let transfer = transfer(inbound, server_addr.clone()).map(|r| {
+        let transfer = transfer(inbound, server_addr.to_string().clone()).map(|r| {
             if let Err(e) = r {
                 println!("Failed to transfer; error={}", e);
             }
