@@ -815,6 +815,7 @@ dependencies = [
  "clap",
  "console-subscriber",
  "futures",
+ "hyper",
  "tokio",
 ]
 

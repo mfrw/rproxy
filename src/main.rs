@@ -2,6 +2,7 @@ use std::error::Error;
 
 use clap::{Arg, Command};
 
+mod http;
 mod tcp;
 
 #[tokio::main]
@@ -11,15 +12,33 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .version("0.1")
         .author("Muhammad Falak R Wani <falakreyaz@gmail.com>")
         .arg_required_else_help(true)
-        .arg(Arg::new("listen_address").short('l').takes_value(true))
         .subcommand(
-            Command::new("tcp").arg(Arg::new("server_address").short('s').takes_value(true)),
+            Command::new("tcp")
+                .arg(
+                    Arg::new("server_address")
+                        .short('s')
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("listen_address")
+                        .short('l')
+                        .takes_value(true)
+                        .required(true),
+                ),
         )
-        .subcommand(Command::new("http"))
+        .subcommand(
+            Command::new("http").arg(
+                Arg::new("listen_address")
+                    .short('l')
+                    .takes_value(true)
+                    .required(true),
+            ),
+        )
         .get_matches();
     match matches.subcommand() {
         Some(("tcp", a)) => tcp::tcp_proxy(a).await,
+        Some(("http", a)) => http::http_proxy(a).await,
         _ => panic!(),
     }
 }
-
