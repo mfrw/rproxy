@@ -4,14 +4,13 @@ use std::net::SocketAddr;
 
 use clap::ArgMatches;
 use hyper::{
+    client::connect::Connect,
     http,
     service::{make_service_fn, service_fn},
     upgrade::Upgraded,
     Body, Client, Method, Request, Response, Server,
 };
 use tokio::net::TcpStream;
-
-type HttpClient = Client<hyper::client::HttpConnector>;
 
 pub async fn http_proxy(args: &ArgMatches) -> Result<(), Box<dyn Error>> {
     let listen_addr = args.value_of("listen_address").unwrap();
@@ -36,7 +35,10 @@ pub async fn http_proxy(args: &ArgMatches) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn proxy(client: HttpClient, req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
+async fn proxy<C>(client: Client<C>, req: Request<Body>) -> Result<Response<Body>, hyper::Error>
+where
+    C: Connect + Clone + Send + Sync + 'static,
+{
     if req.method() == Method::CONNECT {
         if let Some(addr) = host_addr(req.uri()) {
             tokio::task::spawn(async move {
