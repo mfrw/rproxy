@@ -2,6 +2,7 @@ use std::error::Error;
 
 use clap::{Arg, Command};
 
+mod arti;
 mod http;
 mod tcp;
 
@@ -35,10 +36,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .required(true),
             ),
         )
+        .subcommand(
+            Command::new("arti").arg(
+                Arg::new("listen_port")
+                    .short('l')
+                    .takes_value(true)
+                    .required(true),
+            ),
+        )
         .get_matches();
     match matches.subcommand() {
         Some(("tcp", a)) => tcp::tcp_proxy(a).await,
         Some(("http", a)) => http::http_proxy(a).await,
+        Some(("arti", a)) => arti::socks_proxy(a).await,
         _ => panic!(),
     }
 }
