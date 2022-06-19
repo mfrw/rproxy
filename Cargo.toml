@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 arti = "0.4.0"
 arti-client = "0.4.0"
-clap = "3.1.18"
+clap = "3.2.5"
 console-subscriber = "0.1.6"
 futures = "0.3.21"
 hyper = { version = "0.14.19", features = ["full"] }
